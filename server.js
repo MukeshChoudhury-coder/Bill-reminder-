@@ -1,18 +1,22 @@
 let fs= require("fs");
 let http=require("http")
-let path=require("path")
+let path=require("path");
 let {URL}=require("url")
 
 //-- data folder for storing different data inside this folder--//
 let loginFile
+let billFile
 if(!fs.existsSync("loginFolder")){
 loginFile=path.join("dataFolder", "loginFolder.txt")
 }
 
+if(!fs.existsSync("billFolder")){
+    billFile=path.join("dataFolder", "billFolder.txt")
+}
 //---- creating server--//
 const server=http.createServer((req, res)=>{
 
-    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
 res.setHeader("Access-Control-Allow-Methods", "GET, POST");
 res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
@@ -44,15 +48,57 @@ res.setHeader("Access-Control-Allow-Headers", "Content-Type");
          fs.writeFile(loginFile, JSON.stringify(storedData), (err)=>{
             if(err){
                 res.writeHead(404,{"Content-Type": "application/json"})
-                res.end(JSON.stringify({status:"Something is went wrong!"}))
+                res.end(JSON.stringify({message:"Something is went wrong!"}))
             }else{
                  res.writeHead(200,{"Content-Type": "application/json"})
-                res.end(JSON.stringify({status:"Your account is successfully created!"}))
+                res.end(JSON.stringify({message:"Your account is created successfull!"}))
             }
           })
         })
         })
         return
+    }
+    //----- sending login data to frontend---//
+    else if(req.method==="GET" && pathname==="/logindata"){
+        fs.readFile(loginFile, "utf-8",(err, sendData)=>{
+            if(err){
+                 res.writeHead(404,{"Content-Type": "application/json"})
+                res.end()
+            }else if(!err && sendData){
+                 res.writeHead(200,{"Content-Type": "application/json"})
+                res.end(sendData)
+            }
+        })
+        return;
+    }
+    ///-------------- parsing bill data from frontend--------///
+    else if(req.method==="POST" && pathname==="/userbill"){
+        let body=[]
+        req.on("data", chunk=>body.push(chunk));
+        req.on("end", ()=>{
+            let parse=Buffer.concat(body).toString()
+            let parseData=JSON.parse(parse)
+
+            fs.readFile(billFile, "utf-8", (err, data)=>{
+                let storedData=[]
+
+                if(!err && data){
+                    storedData=JSON.parse(data)
+                }
+                storedData.push(parseData)
+
+                fs.writeFile(billFile, JSON.stringify(storedData, 2, null), (err)=>{
+                      if(err){
+                res.writeHead(404,{"Content-Type": "application/json"})
+                res.end(JSON.stringify({message:"Bill is not added"}))
+            }else{
+                 res.writeHead(200,{"Content-Type": "application/json"})
+                res.end(JSON.stringify({message:" Bill Added!"}))
+            }
+                })
+            })
+        })
+        return ;    
     }
 })
 server.listen(3001,()=>{
