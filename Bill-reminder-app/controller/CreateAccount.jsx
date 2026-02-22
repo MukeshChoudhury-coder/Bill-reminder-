@@ -4,7 +4,7 @@ function CreateAccount(){
     <>
     <div id="container">
       <div id="child1"> 
-        <i id="fa-solid fa-money-bill" ></i>
+        <i className={"fa-solid fa-money-bill"} ></i>
         <p className="child1-para">Bill Reminder</p>
       </div>
       <div id="contant">
