@@ -279,3 +279,50 @@ nav{
   color: #dddee0;
   margin-top: 20px;
   }
+
+  /*----- CRUS.JSX SECTION ------**/
+  #Crud-data-container{
+    width: 100vw;
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: column;
+    flex-wrap: wrap;
+  }
+#crud-title{
+  margin: 10px 25px;
+  font-size: 20px;
+   font-family:'Gill Sans', 'Gill Sans MT',  'Trebuchet MS', sans-serif;
+   font-weight: 500 ;
+
+}
+#date-sataus-due-etc-container{
+  display: flex;
+  flex-direction: column;
+ 
+}
+#date-sataus-due-etc{
+   background-color:#d7dde6;
+  display: flex;
+  justify-content: space-evenly;
+  padding: 20px 0;
+  flex-wrap: wrap;
+  margin: 5px 20px;
+  border-radius: 8px;
+}
+#show-users-bill{
+  display: flex;
+  flex-direction: column;
+}
+#bill-container{
+  background-color: green;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  padding: 15px 0;
+  flex-wrap: wrap;
+  margin:0 20px;
+  background-color: whitesmoke;
+  border-bottom: 2px solid black;
+  border-left: 1px solid black;
+  border-radius: 5px;
+}
