@@ -100,8 +100,22 @@ res.setHeader("Access-Control-Allow-Headers", "Content-Type");
         })
         return ;    
     }
+    //------ sending /userbill to frontend-----//
+    else if(req.method==="GET" && pathname==="/userbill"){
+        fs.readFile(billFile, "utf-8",(err,data)=>{
+            if(!err && data){
+                 res.writeHead(200,{"Content-Type": "application/json"})
+                res.end(data)
+            }else{
+                  res.writeHead(404,{"Content-Type": "application/json"})
+                res.end(JSON.stringify({message:"Something went wrong!"}))
+            }
+        })
+        return;
+    }
 })
 server.listen(3001,()=>{
     console.log("server live at http://localhost:3001")
 })
  
+
