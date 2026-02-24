@@ -1,9 +1,14 @@
 import { useCallback, useRef, useState } from "react";
+import Crud from "./Crud";
+import { useContext } from "react";
+import { proContext } from "../Provider/Provider";
+
 
 function Mainbody(){
+const {totalBillAmount}=useContext(proContext)
+
 //--- display ; hidden bill form input--/
 const [display, setDisplay]=useState("none")
-
 const ShowInptField=useCallback(()=>{
     if(display==="none"){
         setDisplay("block")
@@ -25,6 +30,7 @@ async function sendingBillData(e){
             method:"POST",
             headers:{"Content-Type":"application/json"},
             body:JSON.stringify({
+                id: Date.now(),
                 userBill:billRef.current.value,
                 userAmount:amountRef.current.value,
                 userDate:dateRef.current.value
@@ -48,7 +54,7 @@ async function sendingBillData(e){
         <div className="bill-records">
             <div className="bill-records-child1">
                 <span>Total bill</span>
-                <small>0</small>
+                <small>Rs. {totalBillAmount}</small>
             </div>
 
             <div className="bill-records-child2">
@@ -90,6 +96,8 @@ async function sendingBillData(e){
             <button id="add-bill" >Add Bill</button>
             </form>
         </div>
+
+        <Crud></Crud>
         </>
     )
 }
