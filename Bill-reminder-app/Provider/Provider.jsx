@@ -1,8 +1,18 @@
-import { createContext, useEffect, useMemo, useState } from "react";
+import { createContext, useEffect, useMemo, useState, useCallback } from "react";
 
 export const proContext=createContext()
 
 function Provider({children}){
+
+    //--- display ; hidden bill form input--/
+    const [display, setDisplay]=useState("none")
+    const ShowInptField=useCallback(()=>{
+        if(display==="none"){
+            setDisplay("block")
+        }else{
+            setDisplay("none")
+        }
+    }, [display])
 
 const [loginData , setLoginData]=useState("Please Create an Account")
 //------- fetching user`s login data-----//
@@ -11,10 +21,10 @@ const getData=useEffect(()=>{
     .then(res=>res.json())
     .then(data=>{
         setLoginData(data.username)
-        console.log(loginData)
     })
-},[setLoginData] )
- //-------------------------------------------//   
+},[] )
+
+//-------------------------------------------//   
    
 
  //-- FETCHING BILL DATA FROM BACKEND---//
@@ -29,6 +39,7 @@ useEffect(()=>{
    .catch(err=> console.log(err))
 
  },[])
+ 
  //------------------------------------//
 
  //--------- calculating the total bill amount----//
@@ -39,10 +50,32 @@ useEffect(()=>{
     },0)
 
     setBillAmount(total)
- }, [billData])
+   
+ },[])
+
+//----------------------------------------//
+
+//---------EDIT POST AND SEND TO THE BACKEND---//
+const [editedData, setEditedData]=useState()
+
+const geteditInpt=(value)=>{
+setDisplay("block")
+
+ const selected = billData.find((e) => e.id === value)
+
+  setEditedData(selected)
+}
+//-----------------------------------------------------//
+
+
+//----DELETE DATA FOR BILL.TXT------//
+
+
+
+
     return(
         <>
-        <proContext.Provider value={{loginData,getData,billData, totalBillAmount}}>
+        <proContext.Provider value={{loginData,getData,billData, totalBillAmount,geteditInpt, ShowInptField,display, editedData, setBillData}}>
             {children}
         </proContext.Provider>
         </>
