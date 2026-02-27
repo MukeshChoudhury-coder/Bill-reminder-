@@ -4,20 +4,25 @@ let path=require("path");
 let {URL}=require("url")
 
 //-- data folder for storing different data inside this folder--//
-let loginFile
-let billFile
-if(!fs.existsSync("loginFolder")){
-loginFile=path.join("dataFolder", "loginFolder.txt")
+const dataFolder = path.join(__dirname, "dataFolder")
+
+if(!fs.existsSync(dataFolder)){
+    fs.mkdirSync(dataFolder)
 }
 
-if(!fs.existsSync("billFolder")){
-    billFile=path.join("dataFolder", "billFolder.txt")
+if(!fs.existsSync("login.txt")){
+   loginFile = path.join(dataFolder, "login.txt")
 }
+
+if(!fs.existsSync("bill.txt")){
+    billFile = path.join(dataFolder, "bill.txt")
+}
+
 //---- creating server--//
 const server=http.createServer((req, res)=>{
 
     res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
-res.setHeader("Access-Control-Allow-Methods", "GET, POST");
+res.setHeader("Access-Control-Allow-Methods", "GET, POST,PUT,PATCH, DELETE");
 res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
 
@@ -87,7 +92,7 @@ res.setHeader("Access-Control-Allow-Headers", "Content-Type");
                 }
                 storedData.push(parseData)
 
-                fs.writeFile(billFile, JSON.stringify(storedData, 2, null), (err)=>{
+                fs.writeFile(billFile, JSON.stringify(storedData), (err)=>{
                       if(err){
                 res.writeHead(404,{"Content-Type": "application/json"})
                 res.end(JSON.stringify({message:"Bill is not added"}))
@@ -100,15 +105,58 @@ res.setHeader("Access-Control-Allow-Headers", "Content-Type");
         })
         return ;    
     }
+    //------- UPDATING DATA-------------------//
+    else if(req.method==="PUT"&& pathname==="/updatebill"){
+        updateBody=[]
+        req.on("data", chunk=> updateBody.push(chunk));
+        req.on("end", ()=>{
+            const updatedData= JSON.parse(Buffer.concat(updateBody).toString())
+          
+
+            fs.readFile(billFile, "utf-8", (err, bills)=>{
+                let updates
+
+                if(err && !bills){
+                      res.writeHead(404,{"Content-type": "application/json"})
+
+                      res.end(JSON.stringify({message:"Bill not Found!"}))
+                }
+
+                    let parseBill=JSON.parse(bills)
+                    let findIndex=parseBill.findIndex((i)=>{
+                        return i.id===updatedData.id
+                    })
+                      if(findIndex === -1){
+                res.writeHead(404, {"Content-Type":"application/json"})
+                return res.end(JSON.stringify({message:"Bill not found"}))
+            }
+
+                     updates=parseBill[findIndex]=updatedData
+
+                fs.writeFile(billFile, JSON.stringify(parseBill, null, 2) , (err)=>{
+                    if(!err){
+                         res.writeHead(200,{"Content-type": "application/json"})
+
+                      res.end(JSON.stringify({message:"Data saved!"}))
+                    }else{
+                           res.writeHead(500,{"Content-type": "application/json"})
+
+                      res.end(JSON.stringify({message:"something forgotten!"}))
+                    }
+                })
+            })
+        })
+        return;
+    }
     //------ sending /userbill to frontend-----//
     else if(req.method==="GET" && pathname==="/userbill"){
         fs.readFile(billFile, "utf-8",(err,data)=>{
             if(!err && data){
                  res.writeHead(200,{"Content-Type": "application/json"})
                 res.end(data)
-            }else{
+            }else if(!data || err){
                   res.writeHead(404,{"Content-Type": "application/json"})
-                res.end(JSON.stringify({message:"Something went wrong!"}))
+                res.end(JSON.stringify([]))
             }
         })
         return;
@@ -118,4 +166,3 @@ server.listen(3001,()=>{
     console.log("server live at http://localhost:3001")
 })
  
-
