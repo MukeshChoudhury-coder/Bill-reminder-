@@ -1,51 +1,80 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Crud from "./Crud";
 import { useContext } from "react";
 import { proContext } from "../Provider/Provider";
 
 
 function Mainbody(){
-const {totalBillAmount}=useContext(proContext)
+const {totalBillAmount,ShowInptField,display,editedData, setBillData}=useContext(proContext)
 
-//--- display ; hidden bill form input--/
-const [display, setDisplay]=useState("none")
-const ShowInptField=useCallback(()=>{
-    if(display==="none"){
-        setDisplay("block")
-    }else{
-        setDisplay("none")
-    }
-}, [display])
+
 //-----------------------------------------//
 
 //----- sending bill data to backend----//
-const billRef=useRef()
-const amountRef=useRef()
-const dateRef=useRef()
+const [formData, setFormData]=useState({
+     userBill:"",
+     userAmount:"",
+     userDate:""
+})
+useEffect(()=>{
+    if(editedData){
+         setFormData(editedData)
+    }
+},[editedData])
+
 
 async function sendingBillData(e){
     e.preventDefault()
-    try{
+ if(editedData){
+   try{
+ const res=await fetch('http://localhost:3001/updatebill', {
+            method:"PUT",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify(formData)
+        })
+
+        if(res.status===200){
+            const data=await res.json()
+            console.log(data.message)
+
+            setBillData(prev =>
+  prev.map(item =>
+    item.id === formData.id ? formData : item
+  )
+)
+        }else if(res.status===404){
+            const data=await res.json()
+            console.log(data.message)
+        }
+   }catch(err){
+    console.log(err)
+   }
+ }else{
+       try{
         const res=await fetch('http://localhost:3001/userbill', {
             method:"POST",
             headers:{"Content-Type":"application/json"},
             body:JSON.stringify({
                 id: Date.now(),
-                userBill:billRef.current.value,
-                userAmount:amountRef.current.value,
-                userDate:dateRef.current.value
+                userBill:formData.userBill,
+                userAmount:formData.userAmount,
+                userDate:formData.userDate
             })
         })
-
         if(res.ok){
-            let da=await res.json()
-            console.log(da.mesage)
-            
+            console.log("data saved")
         }
+        
+        
     }catch(err){
    console.log(err)
     }
+
+ }
 }
+
+//-------------------------------------------------------//
+
 
 
 
@@ -81,24 +110,24 @@ async function sendingBillData(e){
             <form className="input-fields" style={{display: display}} onSubmit={sendingBillData} >
             <label>
                 <p>Add Bill</p>
-                <input type="text" placeholder="Enter Your Bill..." required ref={billRef} id="bill-inpt "></input>
+                <input type="text" placeholder="Enter Your Bill..." required  id="bill-inpt "  value={formData.userBill} onChange={(e)=>setFormData({...formData, userBill:e.target.value})}></input>
             </label>
 
             <label>
                 <p>Add Amount</p>
-                <input type="number" placeholder="Enter Your Amount..." required ref={amountRef} id="amount-inpt"></input>
+                <input type="number" placeholder="Enter Your Amount..." required id="amount-inpt" value={formData.userAmount}  onChange={(e)=>setFormData({...formData, userAmount:e.target.value})}></input>
             </label>
             <label>
                 <p>Add Due Data</p>
-                <input type="date" placeholder="Enter Your Due Date..." required ref={dateRef} id="date-inpt" ></input>
+                <input type="date" placeholder="Enter Your Due Date..." required id="date-inpt" value={formData.userDate}  onChange={(e)=>setFormData({...formData, userDate: e.target.value})}></input>
             </label>
 
             <button id="add-bill" >Add Bill</button>
             </form>
         </div>
 
-        <Crud></Crud>
+        <Crud ></Crud>
         </>
     )
 }
-export default Mainbody;
+export default Mainbody
