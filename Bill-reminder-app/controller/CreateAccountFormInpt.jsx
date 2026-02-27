@@ -70,4 +70,3 @@ async function postData(e){
     )
 }
 export default CreateAccountFormInpt; 
-
