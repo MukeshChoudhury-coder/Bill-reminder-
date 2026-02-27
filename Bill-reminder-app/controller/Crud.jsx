@@ -1,7 +1,8 @@
 import { useContext } from "react"
 import { proContext } from "../Provider/Provider"
 function Crud(){
-    const {billData}=useContext(proContext)
+    const {billData,geteditInpt}=useContext(proContext)
+
 return(
     <>
     
@@ -20,9 +21,10 @@ return(
            </div>
 
            <div id="show-users-bill">
-           {billData.map((e)=>{
-            return <div id="bill-container">
-                 <div id="Paid-btn-container">
+
+           {Array.isArray(billData)&&billData.map((e)=>{
+            return <div id="bill-container" key={e.id}>
+                 <div id="Paid-btn-container" >
                     <button>Paid</button>
                     <p>{e.userBill}</p>
                  </div>
@@ -31,7 +33,7 @@ return(
              <p></p>
              <div id="status">
                 <button><i className={"fa-solid fa-trash"}></i></button>
-                <button><i className={"fa-solid fa-marker"}></i></button>
+                <button onClick={()=>geteditInpt(e.id)}><i className={"fa-solid fa-marker"}></i></button>
              </div>
             </div>
 
