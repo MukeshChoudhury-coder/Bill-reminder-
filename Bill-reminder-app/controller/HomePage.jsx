@@ -1,4 +1,4 @@
-import { useCallback, useContext } from "react";
+import { useCallback, useContext, useEffect } from "react";
 import { proContext } from "../Provider/Provider";
 import { useState } from "react";
 import { Link } from "react-router-dom"; 
@@ -7,7 +7,7 @@ import Mainbody from "./MainBody";
 function HomePage(){
     const [on ,setOn]=useState("none")
 
-    const {loginData}=useContext(proContext)
+    const {loginData, getPaidBills}=useContext(proContext)
 
     const  onOff=useCallback(()=>{
        if(on==="none"){
@@ -16,7 +16,16 @@ function HomePage(){
         setOn("none")
        }
     }, [on])
-
+    //-----------------------------------------------------//
+      //--- ENABLE DISABLE PROFILE BTN--//
+      const [enableBtn, setEnableBtn]=useState(false)
+      useEffect(()=>{
+        if(loginData==="Please Create an Account"){
+            setEnableBtn(true)
+        }else{
+        setEnableBtn(false)
+        }
+      },[loginData])
     return(
         <>
     <nav>
@@ -26,19 +35,29 @@ function HomePage(){
         </div>
 
         <div id="nav-child2"> 
-            <button id="acc-btn" onClick={onOff} >{loginData[0]}</button>
+           <div className="profilr-icon">
+             <button id="acc-btn" onClick={onOff} disabled={enableBtn} >{loginData[0]}</button>
+            <i className={"fa-solid fa-caret-down"} id="drop-down"></i>
+           </div>
              
-            <div id="edit" style={{display: on}}>
-                <Link to={"/login"}><button className="edit-btn">Create Account</button></Link>
+            <div id="edit"  style={{display: on}} >
+                <Link to={"/login"}><button className="edit-btn" >Edit</button></Link>
 
-                <button className="edit-btn">Archived</button>
+               <Link to={"/paid"}> <button className="edit-btn" onClick={ getPaidBills}>Paid Bills</button></Link>
+               <Link to={"/due"}> <button className="edit-btn" onClick={ getPaidBills}>Over Due</button></Link>
+
             </div>
         </div>
     </nav>
 
-     <Mainbody/>
+   {loginData==="Please Create an Account" ? <div className="create-profile-msg-btn">
+    <h1 id="create-profile-text">Create your profile first</h1> 
+    <img src="../src/assets/createaccount.png" id="create-profile-img"></img>
+   <Link  to={"/login"}> <button id="create-profile-btn">Create Profile</button></Link>
+   </div>: <Mainbody></Mainbody> }
         </>
     )
 }
 export default HomePage;
+
 
