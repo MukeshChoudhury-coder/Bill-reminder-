@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import {  useEffect, useState } from "react";
 import Crud from "./Crud";
 import { useContext } from "react";
 import { proContext } from "../Provider/Provider";
 
 
 function Mainbody(){
-const {totalBillAmount,ShowInptField,display,editedData, setBillData}=useContext(proContext)
+const {totalBillAmount,ShowInptField,display,editedData, setBillData,overDue,hiddenAddBill}=useContext(proContext)
 
 
 //-----------------------------------------//
@@ -58,7 +58,7 @@ async function sendingBillData(e){
                 id: Date.now(),
                 userBill:formData.userBill,
                 userAmount:formData.userAmount,
-                userDate:formData.userDate
+                userDate:formData.userDate,
             })
         })
         if(res.ok){
@@ -71,7 +71,11 @@ async function sendingBillData(e){
     }
 
  }
+
+
 }
+
+
 
 //-------------------------------------------------------//
 
@@ -81,30 +85,21 @@ async function sendingBillData(e){
     return(
         <>
         <div className="bill-records">
-            <div className="bill-records-child1">
-                <span>Total bill</span>
-                <small>Rs. {totalBillAmount}</small>
-            </div>
 
             <div className="bill-records-child2">
                  <span>Total Due</span>
-                <small>0</small>
+                <small>Rs. {totalBillAmount}</small>
             </div>
 
             <div className="bill-records-child3">
                  <span>Total Over Due</span>
-                <small>0</small>
-            </div>
-
-            <div className="bill-records-child4">
-                 <span>Total Upcomming Due</span>
-                <small>0</small>
+                <small>Rs. {overDue}</small>
             </div>
         </div>
 
         <div className="add-btn-form">
           <div id="add-btn-container">
-              <button id="add-btn"  onClick={ShowInptField}>+Add New Bill</button>
+              <button id="add-btn"  onClick={ShowInptField} >+Add New Bill</button>
           </div>
 
             <form className="input-fields" style={{display: display}} onSubmit={sendingBillData} >
