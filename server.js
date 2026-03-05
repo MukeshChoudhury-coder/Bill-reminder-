@@ -1,6 +1,6 @@
 let fs= require("fs");
 let http=require("http")
-let path=require("path");
+let path=require("path")
 let {URL}=require("url")
 
 //-- data folder for storing different data inside this folder--//
@@ -91,14 +91,32 @@ res.setHeader("Access-Control-Allow-Headers", "Content-Type");
                     storedData=JSON.parse(data)
                 }
                 storedData.push(parseData)
+                // ------- DISPLAY STATUS ACCORDING TO DUE DATE-------//
+                let currentDate= new Date().setHours("00","00","00")
+               let statusData= storedData.map((s)=>{
+                    let dueDate= new Date(s.userDate).setHours("00","00","00")
+                    let differ=dueDate-currentDate
+                    let days= Math.ceil(differ/(1000*60*60*24))
 
-                fs.writeFile(billFile, JSON.stringify(storedData), (err)=>{
+                 if(s.status==="PAID"){
+                    return s
+                 }
+
+                  if(days>0){
+                    return {...s, status:`${days} days left`}
+                  }else if(days<=0){
+                    return {...s, status:`Over Due`}
+                  }
+                })
+
+
+                fs.writeFile(billFile, JSON.stringify(statusData,null,2), (err)=>{
                       if(err){
                 res.writeHead(404,{"Content-Type": "application/json"})
-                res.end(JSON.stringify({message:"Bill is not added"}))
+                res.end(JSON.stringify([]))
             }else{
                  res.writeHead(200,{"Content-Type": "application/json"})
-                res.end(JSON.stringify({message:" Bill Added!"}))
+                res.end(JSON.stringify([]))
             }
                 })
             })
@@ -114,26 +132,30 @@ res.setHeader("Access-Control-Allow-Headers", "Content-Type");
           
 
             fs.readFile(billFile, "utf-8", (err, bills)=>{
-                let updates
-
-                if(err && !bills){
+               let findIndex
+               let parseBill
+                if(err || !bills){
                       res.writeHead(404,{"Content-type": "application/json"})
 
                       res.end(JSON.stringify({message:"Bill not Found!"}))
                 }
 
-                    let parseBill=JSON.parse(bills)
-                    let findIndex=parseBill.findIndex((i)=>{
+                    if(!bills || bills.trim===""){
+                        parseBill=[]
+                    }else{
+                         parseBill=JSON.parse(bills)
+                     findIndex=parseBill.findIndex((i)=>{
                         return i.id===updatedData.id
                     })
+                    }
                       if(findIndex === -1){
                 res.writeHead(404, {"Content-Type":"application/json"})
                 return res.end(JSON.stringify({message:"Bill not found"}))
             }
 
-                     updates=parseBill[findIndex]=updatedData
+                     parseBill[findIndex]=updatedData
 
-                fs.writeFile(billFile, JSON.stringify(parseBill, null, 2) , (err)=>{
+                fs.writeFile(billFile, JSON.stringify(parseBill,null, 2) , (err)=>{
                     if(!err){
                          res.writeHead(200,{"Content-type": "application/json"})
 
@@ -160,6 +182,78 @@ res.setHeader("Access-Control-Allow-Headers", "Content-Type");
             }
         })
         return;
+    }
+    //--------------DELETE DATA-------//
+    else if(req.method==="DELETE" && pathname==="/deleteapi"){
+        const id=Number(parseUrl.searchParams.get("id"))
+
+        fs.readFile(billFile, "utf-8",(err, val)=>{
+            let delet
+            if(err || !val){
+                res.writeHead(404,{"Content-Type": "application/json"})
+                res.end(JSON.stringify({dltmsg:" sorry, we dont delete your data!"}))
+            }
+           if(!val || val.trim===""){
+            return 
+           }else{
+           let deletVal=JSON.parse(val)
+           delet= deletVal.filter((d)=>{
+                return d.id!==id
+            })
+            }
+            fs.writeFile(billFile, JSON.stringify( delet, null, 2), (err)=>{
+                if(err){
+                      res.writeHead(404,{"Content-Type": "application/json"})
+                res.end(JSON.stringify({dltmsg:" sorry, we dont delete your data!"}))
+                }else{
+                       res.writeHead(200,{"Content-Type": "application/json"})
+                res.end(JSON.stringify({dltmsg:"your data is deleted!"}))
+                }
+            })
+        })
+        return;
+    }
+    //-------ADD PAID FEATURE------//
+    if( req.method==="PUT" && pathname==="/paidapi"){
+        let paidIds=Number(parseUrl.searchParams.get("id"))
+
+        fs.readFile(billFile, "utf-8", (err, paidOne)=>{
+            
+            let  getPaid=[]
+           
+            if(err || !paidOne){
+
+                 res.writeHead(404,{"Content-Type": "application/json"})
+                res.end(JSON.stringify({dltmsg:" sorry, we dont delete your data!"}))
+          }
+        if(!paidOne || paidOne===""){
+            getPaid=[]
+        }else{
+             getPaid=JSON.parse(paidOne)
+        }
+
+    let findIndx=getPaid.findIndex((i)=>{
+        return i.id===paidIds
+    })
+
+    let findObj=getPaid.find((o)=>{
+        return o.id===paidIds
+    })
+
+   
+        getPaid[findIndx]={...findObj, status:"PAID"}
+    
+          fs.writeFile(billFile, JSON.stringify(getPaid, null, 2), (err)=>{
+            if(err){
+                    res.writeHead(404,{"Content-Type": "application/json"})
+                res.end(JSON.stringify({paidStatus:"kuchu bhail ba bhai!"}))
+            }else{
+                res.writeHead(200,{"Content-Type": "application/json"})
+                res.end(JSON.stringify({paidStatus:"Congratulation your one headache is gone!"}))
+            }
+          })
+        })
+        return
     }
 })
 server.listen(3001,()=>{
