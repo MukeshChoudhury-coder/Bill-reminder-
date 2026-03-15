@@ -555,3 +555,6 @@ margin: 20px 0;
     color: #dddee0;
     margin: 20px 0;
 }
+#search-data{
+  cursor: pointer;
+}
