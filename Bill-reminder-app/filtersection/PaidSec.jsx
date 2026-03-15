@@ -8,7 +8,7 @@ return (
      
      <div>
         {paidData.map((p)=>{
-    return <div key={p.id}>
+    return <div key={p.id} className="data-containers">
         <p>{p.userBill}</p>
         <p>{p.userAmount}</p>
         <p>{p.status}</p>
