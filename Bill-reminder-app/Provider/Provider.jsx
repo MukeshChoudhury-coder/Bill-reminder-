@@ -15,7 +15,7 @@ function Provider({children}){
 
 const [loginData , setLoginData]=useState("Please Create an Account")
 //------- fetching user`s login data-----//
-const getData=useEffect(()=>{
+useEffect(()=>{
     fetch(`http://localhost:3001/logindata`)
     .then(res=>res.json())
     .then(data=>{
@@ -37,7 +37,7 @@ useEffect(()=>{
    })
    .catch(err=> console.log(err))
 
- },[billData])
+ },[])
  
  //------------------------------------//
 
@@ -150,14 +150,48 @@ useMemo(()=>{
         }
         setOverDueBill(getDueBills)
     },[billData])
+    //---------------------------------------------------------//
+      //----SEARCH FEATURE----//
+      const [searchVal, setSearchVal]=useState()
+      const [searchText, setSearchText]=useState()
+      const getSearch=(val)=>{
+     
+        if(!searchVal){
+          setSearchVal([])
+        }
+          
+    
+       const  filterSearch=billData.filter((f)=>{
+        return  f.userBill.toLowerCase().trim().includes(val.toLowerCase().trim())
+        
+       })
+    setSearchVal(filterSearch)
+      
+     if(val.length===0){
+      setSearchVal([])
+     }
+      }
+
+      //----------------------------------------------------//
+        //---SEARCH DATA SECTION-----//
+         const [searchContainer, setSearchContainer]=useState()
+         const getSearchId=(id)=>{
+          let filterData=billData.filter((f)=>{
+            return f.id===id
+          })
+          setSearchContainer(filterData)
+          console.log("mount")
+         }
    
+   useCallback(()=>{
+    getSearchId
+   },[searchContainer])
   return(
         <>
-        <proContext.Provider value={{loginData,getData,billData, totalBillAmount,geteditInpt, ShowInptField,display, editedData, setBillData,getDeleteId,overDue,getPiadId,paidData,getPaidBills,overDueBill}}>
+        <proContext.Provider value={{loginData,billData, totalBillAmount,geteditInpt, ShowInptField,display, editedData, setBillData,getDeleteId,overDue,getPiadId,paidData,getPaidBills,overDueBill, getSearch,searchVal,setSearchText,searchText,setSearchVal,getSearchId,searchContainer}}>
             {children}
         </proContext.Provider>
         </>
     )
 }
 export default Provider ;
-
