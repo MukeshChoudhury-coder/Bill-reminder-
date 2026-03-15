@@ -46,4 +46,3 @@ return(
 }
 export default Crud
 
-
